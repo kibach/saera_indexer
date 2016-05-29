@@ -3,6 +3,7 @@ import snowballstemmer
 import urlparse
 from bs4 import BeautifulSoup
 from langdetect import detect
+import robotparser
 
 
 LANGUAGES = {
@@ -58,6 +59,11 @@ class WebPage(object):
 
     def request(self):
         try:
+            rp = robotparser.RobotFileParser()
+            rp.set_url(self.parsed_url.scheme + "://" + self.parsed_url.hostname + "/robots.txt")
+            rp.read()
+            if not rp.can_fetch("*", self.page_url):
+                return False, None
             self.contents = urllib2.urlopen(self.page_url).read()
             self.requested = True
             return True, None
