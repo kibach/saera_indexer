@@ -1,4 +1,6 @@
 import sys
+reload(sys)
+sys.setdefaultencoding('UTF8')
 import ConfigParser
 from daemonize import Daemonize
 from saera_utils import config
