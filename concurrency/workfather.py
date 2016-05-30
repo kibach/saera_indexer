@@ -31,13 +31,14 @@ def load_settings(stgs):
 
 def father_thread():
     queue = Queue()
+    url_lookup_lock = Lock()
     stem_lock = Lock()
     work_allowance = Event()
     workers = []
     load_queue(queue)
     settings = load_settings(mpdict())
     for _ in xrange(config.BASIC_CONFIG['process_count']):
-        p = worker.CrawlerIndexer(queue, stem_lock, work_allowance, settings)
+        p = worker.CrawlerIndexer(queue, url_lookup_lock, stem_lock, work_allowance, settings)
         p.start()
         workers.append(p)
 

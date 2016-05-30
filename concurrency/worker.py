@@ -7,9 +7,10 @@ from parsers import webpage
 
 class CrawlerIndexer(Process):
 
-    def __init__(self, task_queue, stem_lock, work_allowance, settings):
+    def __init__(self, task_queue, url_lookup_lock, stem_lock, work_allowance, settings):
         Process.__init__(self)
         self.task_queue = task_queue
+        self.url_lookup_lock = url_lookup_lock
         self.stem_lock = stem_lock
         self.work_allowed = work_allowance
         self.settings = settings
@@ -19,6 +20,19 @@ class CrawlerIndexer(Process):
         while True:
             if self.work_allowed.is_set():
                 url, depth, parent = self.task_queue.get()
+
+                self.url_lookup_lock.acquire()
+
+                try:
+                    u = index_models.Document.get(index_models.Document.url == url)
+                except:
+                    u = None
+
+                self.url_lookup_lock.release()
+
+                if u:
+                    continue
+
                 page = webpage.WebPage(url)
                 success, e = page.request()
                 if not success:

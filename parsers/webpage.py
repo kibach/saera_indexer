@@ -54,6 +54,8 @@ class WebPage(object):
             return link
         elif link.startswith('#') or link.startswith('javascript:'):
             return None
+        elif '://' in link:
+            return None
         else:
             return urlparse.urljoin(self.page_url, link)
 
@@ -62,8 +64,13 @@ class WebPage(object):
             rp = robotparser.RobotFileParser()
             rp.set_url(self.parsed_url.scheme + "://" + self.parsed_url.hostname + "/robots.txt")
             rp.read()
-            if not rp.can_fetch("*", self.page_url):
-                return False, None
+
+            try:
+                if not rp.can_fetch("*", self.page_url):
+                    return False, None
+            except:
+                pass
+
             self.contents = urllib2.urlopen(self.page_url).read()
             self.requested = True
             return True, None
