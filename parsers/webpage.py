@@ -2,7 +2,7 @@ import urllib2
 import snowballstemmer
 import urlparse
 from bs4 import BeautifulSoup
-from langdetect import detect
+from langdetect import detect_langs
 import robotparser
 
 
@@ -140,7 +140,15 @@ class WebPage(object):
         if not self.require_requested_and_soup():
             return False
 
-        stemmer = snowballstemmer.stemmer(LANGUAGES[self.get_language()])
+        lid = None
+        for langs in detect_langs(self.get_plaintext()):
+            if langs in LANGUAGES:
+                lid = langs
+                break
+        if lid is None:
+            lid = 'en'
+
+        stemmer = snowballstemmer.stemmer(LANGUAGES[lid])
         stemmed = {}
         for word in self.get_plaintext().split():
             sw = stemmer.stemWord(word.lower())
@@ -155,7 +163,15 @@ class WebPage(object):
         if not self.require_requested_and_soup():
             return False
 
-        stemmer = snowballstemmer.stemmer(LANGUAGES[self.get_language()])
+        lid = None
+        for langs in detect_langs(self.get_plaintext()):
+            if langs in LANGUAGES:
+                lid = langs
+                break
+        if lid is None:
+            lid = 'en'
+
+        stemmer = snowballstemmer.stemmer(LANGUAGES[lid])
         stemmed = {}
         for word in self.get_title().split():
             sw = stemmer.stemWord(word.lower())
