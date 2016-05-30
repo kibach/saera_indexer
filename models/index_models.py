@@ -22,6 +22,7 @@ class Document(Model):
 
 class Stem(Model):
     stem = CharField(unique=True)
+    idf = FloatField()
 
     class Meta:
         db_table = 'searchres_stem'
@@ -42,6 +43,7 @@ class DocumentStemMap(Model):
     stem = ForeignKeyField(Stem, index=True)
     count = IntegerField()
     type = IntegerField()
+    rank_component = FloatField()
 
     class Meta:
         db_table = 'searchres_documentstemmap'

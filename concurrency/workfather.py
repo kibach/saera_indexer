@@ -1,14 +1,17 @@
 import time
+import atexit
 from models import service_models
 from saera_utils import config
 from multiprocessing import Process, Queue, Lock, Event
 from multiprocessing.dummy import dict as mpdict
 from concurrency import worker
+from concurrency import ranker
 
 
 def load_queue(q):
     for item in service_models.Queue.select():
         q.put((item.url, item.depth, item.parent))
+        item.delete_instance()
     return
 
 
@@ -34,15 +37,19 @@ def father_thread():
     url_lookup_lock = Lock()
     stem_lock = Lock()
     work_allowance = Event()
+    ranking_event = Event()
     workers = []
     load_queue(queue)
     settings = load_settings(mpdict())
+    atexit.register(lambda: save_queue(queue))
+
     for _ in xrange(config.BASIC_CONFIG['process_count']):
         p = worker.CrawlerIndexer(queue, url_lookup_lock, stem_lock, work_allowance, settings)
         p.start()
         workers.append(p)
 
     work_allowance.set()
+    rank_process = None
     while True:
         tasks = service_models.IndexerTask.select().where(service_models.IndexerTask.completed == False)
         for task in tasks:
@@ -61,6 +68,11 @@ def father_thread():
                 task.completed = True
                 task.save()
 
+            elif task.type == "reload_queue":
+                load_queue(queue)
+                task.completed = True
+                task.save()
+
             elif task.type == "terminate":
                 work_allowance.clear()
                 time.sleep(5)
@@ -71,5 +83,12 @@ def father_thread():
 
             else:
                 task.delete_instance()
+
+        if not ranking_event.is_set():
+            ranking_event.set()
+            if rank_process is not None and rank_process.is_alive():
+                rank_process.terminate()
+            rank_process = ranker.Ranker(settings, ranking_event)
+            rank_process.start()
 
         time.sleep(float(settings['indexer_refresh_time']))

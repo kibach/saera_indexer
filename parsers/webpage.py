@@ -2,7 +2,7 @@ import urllib2
 import snowballstemmer
 import urlparse
 from bs4 import BeautifulSoup
-from langdetect import detect_langs
+from langdetect import detect_langs, detect
 import robotparser
 
 
