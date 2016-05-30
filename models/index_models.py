@@ -14,14 +14,23 @@ class Document(Model):
     plaintext = TextField()
     indexed_at = DateTimeField()
 
+    class Meta:
+        db_table = 'searchres_document'
+
 
 class Stem(Model):
     stem = CharField(unique=True)
+
+    class Meta:
+        db_table = 'searchres_stem'
 
 
 class DocumentMap(Model):
     A = IntegerField(index=True)
     B = IntegerField(index=True)
+
+    class Meta:
+        db_table = 'searchres_documentmap'
 
 
 class DocumentStemMap(Model):
@@ -29,3 +38,6 @@ class DocumentStemMap(Model):
     stem = ForeignKeyField(Stem, index=True)
     count = IntegerField()
     type = IntegerField()
+
+    class Meta:
+        db_table = 'searchres_documentstemmap'
