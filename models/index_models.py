@@ -1,7 +1,8 @@
 from peewee import *
 from saera_utils import config
 
-db = MySQLDatabase(config.get_mysql_url())
+db = MySQLDatabase(config.BASIC_CONFIG['mysql_db'], host=config.BASIC_CONFIG['mysql_host'], \
+                   user=config.BASIC_CONFIG['mysql_user'], passwd=config.BASIC_CONFIG['mysql_pass'])
 
 
 class Document(Model):
@@ -16,6 +17,7 @@ class Document(Model):
 
     class Meta:
         db_table = 'searchres_document'
+        database = db
 
 
 class Stem(Model):
@@ -23,6 +25,7 @@ class Stem(Model):
 
     class Meta:
         db_table = 'searchres_stem'
+        database = db
 
 
 class DocumentMap(Model):
@@ -31,6 +34,7 @@ class DocumentMap(Model):
 
     class Meta:
         db_table = 'searchres_documentmap'
+        database = db
 
 
 class DocumentStemMap(Model):
@@ -41,3 +45,4 @@ class DocumentStemMap(Model):
 
     class Meta:
         db_table = 'searchres_documentstemmap'
+        database = db

@@ -84,7 +84,7 @@ class CrawlerIndexer(Process):
                     m = index_models.DocumentStemMap()
                     m.stem = s
                     m.doc = doc
-                    m.count = body_stemmas[stem]
+                    m.count = title_stemmas[stem]
                     m.type = 2
                     m.save()
 

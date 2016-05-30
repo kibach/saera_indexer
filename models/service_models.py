@@ -1,7 +1,8 @@
 from peewee import *
 from saera_utils import config
 
-db = MySQLDatabase(config.get_mysql_url())
+db = MySQLDatabase(config.BASIC_CONFIG['mysql_db'], host=config.BASIC_CONFIG['mysql_host'], \
+                   user=config.BASIC_CONFIG['mysql_user'], passwd=config.BASIC_CONFIG['mysql_pass'])
 
 
 class Setting(Model):
@@ -10,6 +11,7 @@ class Setting(Model):
 
     class Meta:
         db_table = 'searchres_setting'
+        database = db
 
 
 class Queue(Model):
@@ -19,6 +21,7 @@ class Queue(Model):
 
     class Meta:
         db_table = 'searchres_queue'
+        database = db
 
 
 class IndexerTask(Model):
@@ -29,3 +32,4 @@ class IndexerTask(Model):
 
     class Meta:
         db_table = 'searchres_indexertask'
+        database = db
