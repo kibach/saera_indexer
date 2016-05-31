@@ -41,8 +41,10 @@ class Ranker(Process):
             relation.save()
 
             df = index_models.DocumentStemMap.select(index_models.DocumentStemMap.stem == relation.stem).count()
-            relation.stem.idf = log((doc_cnt - df + 0.5) / (df + 0.5))
-            relation.stem.save()
+            z = (doc_cnt - df + 0.5) / (df + 0.5)
+            if z > 0:
+                relation.stem.idf = log(z)
+                relation.stem.save()
 
         self.event.clear()
         return
