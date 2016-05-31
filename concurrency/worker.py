@@ -34,6 +34,7 @@ class CrawlerIndexer(Process):
                 page = webpage.WebPage(url)
                 success, e = page.request()
                 if not success:
+                    self.url_lookup_lock.release()
                     continue
                 doc = index_models.Document()
                 doc.url = url
