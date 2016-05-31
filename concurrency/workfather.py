@@ -75,10 +75,14 @@ def father_thread():
 
             elif task.type == "terminate":
                 work_allowance.clear()
+                if rank_process is not None and rank_process.is_alive():
+                    rank_process.terminate()
                 time.sleep(5)
                 for p in workers:
                     p.terminate()
                 save_queue(queue)
+                task.completed = True
+                task.save()
                 return
 
             else:

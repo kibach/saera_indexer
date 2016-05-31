@@ -28,8 +28,6 @@ class CrawlerIndexer(Process):
                 except:
                     u = None
 
-                self.url_lookup_lock.release()
-
                 if u:
                     continue
 
@@ -47,6 +45,7 @@ class CrawlerIndexer(Process):
                 doc.contents = page.get_contents()
                 doc.indexed_at = datetime.datetime.now()
                 doc.save()
+                self.url_lookup_lock.release()
 
                 body_stemmas = page.get_all_stemmas()
                 for stem in body_stemmas:
@@ -91,6 +90,12 @@ class CrawlerIndexer(Process):
                 if int(self.settings['max_depth']) == -1 or int(self.settings['max_depth']) > depth:
                     i = 0
                     for link in page.get_all_links():
+                        try:
+                            u = index_models.Document.get(index_models.Document.url == link)
+                        except:
+                            u = None
+                        if u:
+                            continue
                         self.task_queue.put((link, depth + 1, doc.id))
                         i += 1
                         if i == int(self.settings['max_width']):
