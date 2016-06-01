@@ -29,15 +29,20 @@ class CrawlerIndexer(Process):
                     u = None
 
                 if u:
+                    self.url_lookup_lock.release()
                     continue
+
+                doc = index_models.Document()
+                doc.url = url
+                doc.save()
+
+                self.url_lookup_lock.release()
 
                 page = webpage.WebPage(url)
                 success, e = page.request()
                 if not success:
                     self.url_lookup_lock.release()
                     continue
-                doc = index_models.Document()
-                doc.url = url
                 doc.domain = page.get_domain()
                 doc.title = page.get_title()
                 doc.language = page.get_language()
@@ -46,7 +51,6 @@ class CrawlerIndexer(Process):
                 doc.contents = page.get_contents()
                 doc.indexed_at = datetime.datetime.now()
                 doc.save()
-                self.url_lookup_lock.release()
 
                 body_stemmas = page.get_all_stemmas()
                 for stem in body_stemmas:
